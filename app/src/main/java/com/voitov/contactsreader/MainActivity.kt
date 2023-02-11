@@ -12,7 +12,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        requestPermission()
+        val permissionType =
+            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS)
+        if (permissionType == PackageManager.PERMISSION_GRANTED) {
+            requestContacts()
+        } else {
+            requestPermission()
+        }
     }
 
     private fun requestPermission() {
@@ -30,14 +36,12 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         Log.d(TAG, requestCode.toString())
-        if (requestCode == READ_CONTACTS_REQUEST_CODE) {
-            Log.d(TAG, requestCode.toString() + " da")
-            val permissionType =
-                ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS)
-            if (permissionType == PackageManager.PERMISSION_GRANTED) {
+        if (requestCode == READ_CONTACTS_REQUEST_CODE && grantResults.isNotEmpty()) {
+            val permissionGranted = grantResults[0] == PackageManager.PERMISSION_GRANTED
+            if (permissionGranted) {
                 requestContacts()
             } else {
-                requestPermission()
+                Log.d(TAG, "Access denied")
             }
         }
     }
