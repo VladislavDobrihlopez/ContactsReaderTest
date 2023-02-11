@@ -4,6 +4,7 @@
     package="com.voitov.contactsreader">
 
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
 
     <application
         android:allowBackup="true"
@@ -25,7 +26,4 @@
             </intent-filter>
         </activity>
     </application>
-    <queries>
-        <provider android:authorities="content://com.android.contacts" />
-    </queries>
 </manifest>

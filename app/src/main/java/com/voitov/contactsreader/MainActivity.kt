@@ -1,23 +1,52 @@
 package com.voitov.contactsreader
 
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 
+
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+//        val permissionType =
+//            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS)
+//        if (permissionType == PackageManager.PERMISSION_GRANTED) {
+//            requestContacts()
+//        } else {
+//            requestPermission()
+//        }
+
         val permissionType =
-            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_CONTACTS)
+            ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_SMS)
         if (permissionType == PackageManager.PERMISSION_GRANTED) {
-            requestContacts()
+            retrieveSmsMessages()
         } else {
-            requestPermission()
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(android.Manifest.permission.READ_SMS),
+                READ_SMS_REQUEST_CODE
+            )
+        }
+    }
+
+    private fun retrieveSmsMessages() {
+        val uri = Uri.parse("content://sms")
+        val projection = arrayOf("_id", "address", "date", "body")
+        val cursor = contentResolver.query(uri, projection, null, null, null)
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                val address = cursor.getString(cursor.getColumnIndexOrThrow("address"))
+                val date = cursor.getString(cursor.getColumnIndexOrThrow("date"))
+                val body = cursor.getString(cursor.getColumnIndexOrThrow("body"))
+                Log.d(TAG, "Address: $address Date: $date Body: $body")
+            }
+            cursor.close()
         }
     }
 
@@ -43,6 +72,8 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Log.d(TAG, "Access denied")
             }
+        } else if (requestCode == READ_SMS_REQUEST_CODE && grantResults.isNotEmpty()) {
+            retrieveSmsMessages()
         }
     }
 
@@ -77,5 +108,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "MainActivity"
         private const val READ_CONTACTS_REQUEST_CODE = 100
+        private const val READ_SMS_REQUEST_CODE = 101
     }
 }
